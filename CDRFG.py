@@ -136,9 +136,9 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
             if (j==1):
                 fmjs=fm[j]+fms[nfsm:nfs]
             
-            Su[j,i]=np.mean(4*(Iu[i]*Uav[i])^2*(Lu[i]/Uav[i])./np.power(1+70.8*np.power(fmjs*Lu[i]/Uav[i],2),(5/6))) #Revisar division
-            Sv[j,i]=np.mean(4*(Iv[i]*Uav[i])^2*(Lv[i]/Uav[i])*np.power(1+188.4*(2*fmjs*Lv[i]/Uav[i],2))./np.power(1+70.8*np.power(2*fmjs*Lv[i]/Uav[i],2),(11/6)))
-            Sw[j,i]=np.mean(4*(Iw[i]*Uav[i])^2*(Lw[i]/Uav[i])*np.power(1+188.4*(2*fmjs*Lw[i]/Uav[i],2))./np.power(1+70.8*np.power(2*fmjs*Lw[i]/Uav[i],2),(11/6)))
+            Su[j,i]=np.mean(4*(Iu[i]*Uav[i])^2*(Lu[i]/Uav[i])/np.power(1+70.8*np.power(fmjs*Lu[i]/Uav[i],2),(5/6))) #Revisar division
+            Sv[j,i]=np.mean(4*(Iv[i]*Uav[i])^2*(Lv[i]/Uav[i])*np.power(1+188.4*(2*fmjs*Lv[i]/Uav[i],2))/np.power(1+70.8*np.power(2*fmjs*Lv[i]/Uav[i],2),(11/6)))
+            Sw[j,i]=np.mean(4*(Iw[i]*Uav[i])^2*(Lw[i]/Uav[i])*np.power(1+188.4*(2*fmjs*Lw[i]/Uav[i],2))/np.power(1+70.8*np.power(2*fmjs*Lw[i]/Uav[i],2),(11/6)))
     
     ## Mean long. velocity used to identify the L scale
     UavLs=np.mean(Uav) 
@@ -147,8 +147,8 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
     K=np.zeros((nf,3,nm)) #Buscar porque tiene 3 parametros
     r=np.random.randn(nf,3,nm)
-    P=r./abs(r).*np.sqrt(1/nf*np.power(r,2)./(1+np.power(r,2)))
-    Q=r./abs(r).*np.sqrt(1/nf*np.power(1,2)./(1+np.power(r,2)))
+    P=r/abs(r)*np.sqrt(1/nf*np.power(r,2)/(1+np.power(r,2)))
+    Q=r/abs(r)*np.sqrt(1/nf*1**2/(1+np.power(r,2)))
     Ls=np.zeros((nm,3,nd))
     for nmi in range(nm):
         for nyi in range(nd):
@@ -159,7 +159,7 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
             else: 
                 Gammai=3.7*np.power(Beta,-0.3)
             
-            Ls[nmi,:,nyi]=Uav[nyi]/fm[nmi]./Cxyz/Gammai
+            Ls[nmi,:,nyi]=Uav[nyi]/fm[nmi]/Cxyz/Gammai
         
         K[:,:,nmi]=RandSampleSphere(nf)
         
@@ -175,13 +175,13 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     for inxyi in range(nd):
         for nmi in range(nm):
 
-            xjbar=1./Ls[nmi,:,inxyi].*np.array([X[inxyi],Y[inxyi],Z[inxyi]]) # Revisar que arma aca
+            xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],Y[inxyi],Z[inxyi]])
 
             kjxj=(xjbar[0]*K[:,0,nmi]+xjbar[1]*K[:,1,nmi]+xjbar[2]*K[:,2,nmi])
 
-            U[inxyi,:]=U[inxyi,:]+sum(np.sqrt(Su[nmi,inxyi]*df*2)*(P[:,0,nmi]*np.ones((1,nt))).*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Su[nmi,inxyi]*df*2)*(Q[:,0,nmi]*np.ones((1,nt))).*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
-            V[inxyi,:]=V[inxyi,:]+sum(np.sqrt(Sv[nmi,inxyi]*df*2)*(P[:,1,nmi]*np.ones((1,nt))).*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Sv[nmi,inxyi]*df*2)*(Q[:,1,nmi]*np.ones((1,nt))).*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
-            W[inxyi,:]=W[inxyi,:]+sum(np.sqrt(Sw[nmi,inxyi]*df*2)*(P[:,2,nmi]*np.ones((1,nt))).*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Sw[nmi,inxyi]*df*2)*(Q[:,2,nmi]*np.ones((1,nt))).*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
+            U[inxyi,:]=U[inxyi,:]+sum(np.sqrt(Su[nmi,inxyi]*df*2)*(P[:,0,nmi]*np.ones((1,nt)))*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Su[nmi,inxyi]*df*2)*(Q[:,0,nmi]*np.ones((1,nt)))*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
+            V[inxyi,:]=V[inxyi,:]+sum(np.sqrt(Sv[nmi,inxyi]*df*2)*(P[:,1,nmi]*np.ones((1,nt)))*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Sv[nmi,inxyi]*df*2)*(Q[:,1,nmi]*np.ones((1,nt)))*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
+            W[inxyi,:]=W[inxyi,:]+sum(np.sqrt(Sw[nmi,inxyi]*df*2)*(P[:,2,nmi]*np.ones((1,nt)))*np.cos(wn[:,nmi]*tt+kjxj*np.ones((1,nt)))+np.sqrt(Sw[nmi,inxyi]*df*2)*(Q[:,2,nmi]*np.ones((1,nt)))*np.sin(wn[:,nmi]*tt+kjxj*np.ones((1,nt))))
         
         ## Add the mean velocity
         U[inxyi,:]=U[inxyi,:]+Uav[inxyi] 
@@ -231,17 +231,23 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
 
 
-#main 
-#h0u=0.3644;alphau=0.3264;Uh=10.0;
-#h0I=0.3364;
-#Iuh=0.2084;Ivh=0.1815;Iwh=0.1523;
-#dIu=-0.1914;dIv=-0.1228;dIw=-0.0048;
-#h0L=0.254;
-#Luh=0.302;Lvh=0.0815;Lwh=0.0326;
-#dLu=0.473;dLv=0.8813;dLw=1.5390;
-#Cxyz=[10 10 10];DGamma=0.3;
-#nf=100;nm=50;fmax=100;
-#dt=1/fmax/2/2.5;nt=1000;
-#M=[zeros(10,1) zeros(10,1) (0.05:0.1:1)']; % Sample coordinate matrix
+def main(): 
+    h0u=0.3644;alphau=0.3264;Uh=10.0;
+    h0I=0.3364;
+    Iuh=0.2084;Ivh=0.1815;Iwh=0.1523;
+    dIu=-0.1914;dIv=-0.1228;dIw=-0.0048;
+    h0L=0.254;
+    Luh=0.302;Lvh=0.0815;Lwh=0.0326;
+    dLu=0.473;dLv=0.8813;dLw=1.5390;
+    Cxyz=np.array([10,10,10]);
+    DGamma=0.3;
+    nf=100;nm=50;fmax=100;
+    dt=1/fmax/2/2.5;nt=1000;
+    M=np.zeros((10,3));
+    M[:,2]=np.arange(0.05,1,0.1).transpose(); # Sample coordinate matrix
 
-#[X,Y,Z,U,V,W]=CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,M);
+    CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,M);
+    
+
+if __name__ == "__main__":
+    main()

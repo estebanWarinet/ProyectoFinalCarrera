@@ -40,7 +40,7 @@ def mapp(X,q,p):
     return F.transpose()
 
 
-def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,M):
+def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z):
 
     # Consistent DRFG Function By Aboshosha et al. (2015)
     # INPUT Parameters
@@ -79,11 +79,11 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     ##==========================================================================
     
     ## Extraccion de las coordenadas. En el caso Ejemplo X e Y son 0
-    X=M[:,0]
-    Y=M[:,1] 
-    Z=M[:,2] # x and y coordinates vector at the inflow plane
+    #X=M[:,0]
+    #Y=M[:,1] 
+    #Z=M[:,2] # x and y coordinates vector at the inflow plane
 
-    nd=X.shape[0] # Generar numero de puntos. Termina siendo el numero de filas de M
+    nd=Z.shape[0] # Generar numero de puntos. Termina siendo el numero de filas de M
     
     ## Infomacion de la frecuencia
     # nm es el numero de segmentos de frecuencia
@@ -231,13 +231,16 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     auxP=np.zeros((nf,1))
     auxQ=np.zeros((nf,1))
     auxWn=np.zeros((nf,1))
+    auxZeros=np.zeros((Z.shape[0],1))
     vectorNTcolumnas=np.ones((1,nt))
     kjxj=np.zeros((nf,1))
 
     for inxyi in range(nd):
         for nmi in range(nm):
 
-            xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],Y[inxyi],Z[inxyi]]) # eq(4) del paper
+
+            #xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],Y[inxyi],Z[inxyi]]) # eq(4) del paper
+            xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],auxZeros[inxyi],Z[inxyi]]) # eq(4) del paper
             kjxj[:,0]=(xjbar[0]*K[:,0,nmi]+xjbar[1]*K[:,1,nmi]+xjbar[2]*K[:,2,nmi])
 
             auxP[:,0]=P[:,0,nmi]
@@ -260,42 +263,37 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
         U[inxyi,:]=U[inxyi,:]+Uav[inxyi] # Porque solo en dirección longitudinal? 
 
     ## Pasar a los archivos csv
-    TableU=np.zeros((X.shape[0],U.shape[1]+3))
-    TableV=np.zeros((X.shape[0],V.shape[1]+3))
-    TableW=np.zeros((X.shape[0],W.shape[1]+3))
+
+    TablaVel = np.zeros((X.shape[0],U.shape[1]+V.shape[1]+ W.shape[1] +3))
+
+    TablaVel[:,0]=X[:,0]
+
+    indY=0
+    indZ=0
+    while indY < TablaVel.shape[0]:
+        TablaVel[indY:indY+Z.shape[0],1]= Y[indZ]
+        TablaVel[indY:indY+Z.shape[0],2]= Z[:]
+        indY=indY+Z.shape[0]
+        indZ=indZ+1
+
     
-    TableU[:,0]=X[:]
-    TableU[:,1]=Y[:]
-    TableU[:,2]=Z[:]
-    TableU[:,3::]=U[:,:]
-    TableV[:,0]=X[:]
-    TableV[:,1]=Y[:]
-    TableV[:,2]=Z[:]
-    TableV[:,3::]=V[:,:]
-    TableW[:,0]=X[:]
-    TableW[:,1]=Y[:]
-    TableW[:,2]=Z[:]
-    TableW[:,3::]=W[:,:]
+    indExt=0
+    while indExt < TablaVel.shape[0]:
+        indVel=3
+        indTab=0
+        while indVel < TablaVel.shape[1]:
+            TablaVel[indExt:indExt+Z.shape[0],indVel]= U[:,indTab]
+            TablaVel[indExt:indExt+Z.shape[0],indVel+1]= V[:,indTab]
+            TablaVel[indExt:indExt+Z.shape[0],indVel+2]= W[:,indTab]
+            indVel=indVel+3
+            indTab=indTab+1
+        indExt=indExt+Z.shape[0]
     
-    for i in range(TableU.shape[0]):
+    for i in range(TablaVel.shape[0]):
         fid2.write('\n')
-        for j in range(TableU.shape[1]):
-            cadena= str(TableU[i,j]) + "," + str(TableV[i,j]) +"," + str(TableW[i,j])+","
+        for j in range(TablaVel.shape[1]):
+            cadena= str(TablaVel[i,j]) + ","
             fid2.write(cadena)
-
-    
-    for i in range(TableV.shape[0]):
-        fid3.write('\n')
-        for j in range(TableV.shape[1]):
-            cadena=str(TableV[i,j])+","
-            fid3.write(cadena)
-
-    
-    for i in range(TableW.shape[0]):
-        fid4.write('\n')
-        for j in range(TableW.shape[1]):
-            cadena=str(TableW[i,j])+","
-            fid4.write(cadena)
 
     
     fid2.close()
@@ -341,11 +339,11 @@ def main():
     fmax=100 # Frecuencia maxima tabla 2
     dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo 
     nt=1000 #Cantidad de pasos de tiempo
-    Z= np.arange(0.05,1.35,0.05) # Altura del dominio. 1.3 m
-    M=np.zeros((Z.shape[0],3))
-    M[:,2]= Z[:]
+    Z= np.arange(0.05,1.3,0.05) # Altura del dominio. 1.3 m
+    Y= np.arange(-1.00,1.25,0.25) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
+    X=np.zeros((Z.shape[0]*Y.shape[0],1))
 
-    CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,M)
+    CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)
     
 
 if __name__ == "__main__":

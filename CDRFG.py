@@ -255,7 +255,7 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
     ## Pruebo el calculo de la coherencia entre dos puntos
     fs = 5e1
-    f, Cxy = signal.coherence(U[0,:], U[3,:],fs)
+    f, Cxy = signal.coherence(U[0,:], U[3,:],fs,window='hann')
     plt.semilogy(f, Cxy)
     plt.xlabel('frequency [Hz]')
     plt.ylabel('Coherence')

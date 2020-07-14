@@ -2,6 +2,9 @@ import numpy as np
 import math
 import csv
 
+from scipy import signal
+import matplotlib.pyplot as plt
+
 
 ########################################################
 
@@ -96,26 +99,14 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     tt=np.arange(0,lim_tt+dt,dt) # Vector de tiempo
     
     ## Abrir los archivos y acomodarlos de la forma que se requiere para STAR CCM+
-    fid2 = open('inletdata_U.csv','w')
-    fid3 = open('inletdata_V.csv','w')
-    fid4 = open('inletdata_W.csv','w')
+    fid2 = open('TablaVelocidades.csv','w')
     #Escribo las cabezeras de los archivos (primer fila)
     csvHead='X,Y,Z,'
     fid2.write(csvHead)
-    fid3.write(csvHead)
-    fid4.write(csvHead)
 
     for i in range(tt.shape[0]):
         cadena='ux(m/s)[t='+str(tt[i])+'], '+'vx(m/s)[t='+str(tt[i])+'], '+'wx(m/s)[t='+str(tt[i])+'], '
         fid2.write(cadena)
-        
-    for i in range(tt.shape[0]):
-        cadena='vx(m/s)[t='+str(tt[i])+'], '
-        fid3.write(cadena)
-        
-    for i in range(tt.shape[0]):
-        cadena='wx(m/s)[t='+str(tt[i])+'], '
-        fid4.write(cadena)
 
 
     ## Calcular la velocidad promedio dado que
@@ -262,6 +253,14 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
         ## Sumarle la velocidad media
         U[inxyi,:]=U[inxyi,:]+Uav[inxyi] # Porque solo en dirección longitudinal? 
 
+    ## Pruebo el calculo de la coherencia entre dos puntos
+    fs = 5e1
+    f, Cxy = signal.coherence(U[0,:], U[3,:],fs)
+    plt.semilogy(f, Cxy)
+    plt.xlabel('frequency [Hz]')
+    plt.ylabel('Coherence')
+    plt.show()
+
     ## Pasar a los archivos csv
 
     TablaVel = np.zeros((X.shape[0],U.shape[1]+V.shape[1]+ W.shape[1] +3))
@@ -297,8 +296,6 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
     
     fid2.close()
-    fid3.close()
-    fid4.close()
 
 
 

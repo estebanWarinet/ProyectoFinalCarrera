@@ -300,11 +300,13 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
 
 def main(): 
+    ## La escala  que uso Aboshosha es de 1:500
+    ## Las medidas del edificio son Height Hs 182.2, width Ws 30.48, depth Ds 30.48
     h0u=0.3644 # Altura de referencia para la velocidad media Tabla |
     alphau=0.3264 # Exponente para la velocidad media               | -> Tabla 2
     Uh=10.0 # Velocidad media de referencia                         |
 
-    h0I=0.3364 # Altura de referencia para la intesidad -> Revizar origen
+    h0I=0.3364 # Altura de referencia para la intesidad -> Revizar origen == # Altura de referencia para la velocidad media Tabla
     #--------Iuh,Ivh, Iwh son las intensidades longitudinal, transversal. Zou et al 2003 y ESDU 2001
     Iuh=0.2084
     Ivh=0.1815
@@ -334,7 +336,7 @@ def main():
     nf=100 # Numero de frecuencias random dentro de un segmento tabla 2 (M)
     nm=50 # Numero de segmentos de frecuencia tabla 2 (N)
     fmax=100 # Frecuencia maxima tabla 2
-    dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo 
+    dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo Seguro para mantener el numero de número de Courant
     nt=1000 #Cantidad de pasos de tiempo
     Z= np.arange(0.05,1.3,0.05) # Altura del dominio. 1.3 m
     Y= np.arange(-1.00,1.25,0.25) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25

@@ -5,6 +5,8 @@ import csv
 import Funciones as fun
 import Validar as val
 import ManejarArchivos as archivos
+import EspectrosFrecuencias as espFrec
+import GenerarCamposVelocidad as genCamVel
 
 def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z):
 
@@ -103,34 +105,8 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     #================================================================================================
     #========================== Calcular espectros de frecuencia ====================================
     #================================================================================================
-    ## Creo las matrices del espectro
-    # nm es el numero de segmentos, nd cantidad de puntos
-    Su=np.zeros((nm,nd))
-    Sv=np.zeros((nm,nd))
-    Sw=np.zeros((nm,nd))
     
-    ## Investigar de donde salen estos numeros    
-    fms=np.arange(-0.5,0.5+0.05,0.05)*df
-    nfsm=fms.shape[0]/2+0.5 
-    nfs=fms.shape[0] 
-    
-    ## Espectros de la turbulencia según los define Von Karma
-    # fm vector de frecuencias
-    # Uav Vetor de velocidad promedio a diferentes alturas
-    # Iu, Iv, Iw son las intensidades longitudinal, transversal y vertical
-    # Lu, Lv, Lw son los perfiles escalas de longitud en direccion
-    for i in range(nd):
-        for j in range (nm):
-            fmjs=fm[j]+fms
-            if (j==1):
-                fmjs=fm[j]+fms[int(nfsm):int(nfs)]
-            Su[j,i]=np.mean(4*((Iu[i]*Uav[i])**2)*(Lu[i]/Uav[i])/np.power(1+70.8*np.power(fmjs*Lu[i]/Uav[i],2),(5/6))) #Revisar division
-            Sv[j,i]=np.mean(4*((Iv[i]*Uav[i])**2)*(Lv[i]/Uav[i])*(1+188.4*np.power(2*fmjs*Lv[i]/Uav[i],2))/np.power(1+70.8*np.power(2*fmjs*Lv[i]/Uav[i],2),(11/6)))
-            Sw[j,i]=np.mean(4*((Iw[i]*Uav[i])**2)*(Lw[i]/Uav[i])*(1+188.4*np.power(2*fmjs*Lw[i]/Uav[i],2))/np.power(1+70.8*np.power(2*fmjs*Lw[i]/Uav[i],2),(11/6)))
-    
-    ## Velocidad longitudinal media utilizada para identificar la escala L
-    # Uav Vetor de velocidad promedio a diferentes alturas
-    UavLs=np.mean(Uav) # No se utiliza para nada
+    Su,Sv,Sw = espFrec.CalcularEspectrosFrecuencias(df,nm,nd,Uav,fm,Iu,Iv,Iw,Lu, Lv, Lw)
 
     #=============================================================================================
     #============================= Generar P, Q y las matriz K ===================================
@@ -173,41 +149,11 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     #============================ Generar los campos de velocidad ================================
     #=============================================================================================
 
-    U=np.zeros((nd,nt))
-    V=np.zeros((nd,nt))
-    W=np.zeros((nd,nt))
+    U,V,W = genCamVel.GenCamposVelocidad(tt,df,nt,nd,nf,nm,P,Q,wn,K,Ls,X,Z,Su,Sv,Sw,Uav)
 
-    auxP=np.zeros((nf,1))
-    auxQ=np.zeros((nf,1))
-    auxWn=np.zeros((nf,1))
-    auxZeros=np.zeros((Z.shape[0],1))
-    vectorNTcolumnas=np.ones((1,nt))
-    kjxj=np.zeros((nf,1))
-
-    for inxyi in range(nd):
-        for nmi in range(nm):
-
-            xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],auxZeros[inxyi],Z[inxyi]]) # eq(4) del paper
-            kjxj[:,0]=(xjbar[0]*K[:,0,nmi]+xjbar[1]*K[:,1,nmi]+xjbar[2]*K[:,2,nmi])
-
-            auxP[:,0]=P[:,0,nmi]
-            auxQ[:,0]=Q[:,0,nmi]
-            auxWn[:,0]=wn[:,nmi]
-
-            U[inxyi,:]=U[inxyi,:]+sum(np.sqrt(Su[nmi,inxyi]*df*2)*(auxP[:]*vectorNTcolumnas)*np.cos(auxWn[:]*tt+kjxj*vectorNTcolumnas)+np.sqrt(Su[nmi,inxyi]*df*2)*(auxQ[:]*vectorNTcolumnas)*np.sin(auxWn[:]*tt+kjxj*vectorNTcolumnas))
-
-            auxP[:,0]=P[:,1,nmi]
-            auxQ[:,0]=Q[:,1,nmi]
-            
-            V[inxyi,:]=V[inxyi,:]+sum(np.sqrt(Sv[nmi,inxyi]*df*2)*(auxP[:]*vectorNTcolumnas)*np.cos(auxWn[:]*tt+kjxj*vectorNTcolumnas)+np.sqrt(Sv[nmi,inxyi]*df*2)*(auxQ[:]*vectorNTcolumnas)*np.sin(auxWn[:]*tt+kjxj*vectorNTcolumnas))
-            
-            auxP[:,0]=P[:,2,nmi]
-            auxQ[:,0]=Q[:,2,nmi]
-            
-            W[inxyi,:]=W[inxyi,:]+sum(np.sqrt(Sw[nmi,inxyi]*df*2)*(auxP[:]*vectorNTcolumnas)*np.cos(auxWn[:]*tt+kjxj*vectorNTcolumnas)+np.sqrt(Sw[nmi,inxyi]*df*2)*(auxQ[:]*vectorNTcolumnas)*np.sin(auxWn[:]*tt+kjxj*vectorNTcolumnas))
-        
-        ## Sumarle la velocidad media
-        U[inxyi,:]=U[inxyi,:]+Uav[inxyi] # Porque solo en dirección longitudinal? 
+    #=============================================================================================
+    #====================== Graficar el decaimiento de coherencia ================================
+    #=============================================================================================
 
     ## Calcular el decaimiento de la coherencia con el aumento de la frecuencia
     val.DecaimientoCoherencia(U,0,3)

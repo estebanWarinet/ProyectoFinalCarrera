@@ -2,46 +2,9 @@ import numpy as np
 import math
 import csv
 
-from scipy import signal
-import matplotlib.pyplot as plt
-
-
-########################################################
-
-def RandSampleSphere(N):
-    # Esta funcion genera cordenadas uniformemente distribuidas
-    # de forma aleatoria dentro de una esfera de radio unitario, 
-    # tiene como fin mantener la condicion de libre divergencia.
-    # Satisface la ecuacion 3 del paper de Aboshosha
-    t0z=2*math.pi*np.random.rand(N,1) # vector de numeros aleatorio de N filas por 1 columna
-    z=np.sin(t0z)
-    t=2*math.pi*np.random.rand(N,1)# vector de numeros aleatorio de N filas por 1 columna
-    r=np.sqrt(1-np.power(z,2))
-    x=r*np.cos(t)
-    y=r*np.sin(t)
-    XYZ=np.zeros((N,3))
-    XYZ[:,0]=x[:,0]
-    XYZ[:,1]=y[:,0]
-    XYZ[:,2]=z[:,0]
-    return XYZ
-
-    
-def mapp(X,q,p):
-    # System of non-linear equations that maintains the divergence-free condition
-    # Sitema de ecuaciones no lineales que mantienen la condicion de libre divergencia
-    # |p_x p_y p_z| |k_x|   |0|
-    # |q_x q_y q_z| |k_y| = |0|
-    # |k_x k_y k_z| |k_z|   |1|
-    # X vector columna, q y p Vectores filas
-    fx=np.zeros((3,1))
-    fx[0,0]=1
-    K=np.zeros((3,3))
-    K[0,:]=X[:]
-    K[1,:]=q[:]
-    K[2,:]=p[:]
-    F=fx.transpose()-np.dot(K,X)
-    return F.transpose()
-
+import Funciones as fun
+import Validar as val
+import ManejarArchivos as archivos
 
 def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z):
 
@@ -73,18 +36,13 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     # nt Number of time steps
     # M Matrix of the inflow coordinates [x y z]
 
-    # OUTPUT Parameters
-    # Three files (i.e. inletdata_U, inletdata_V and inletdata_W) that have the
-    # generated velocity - compatible with STAR CCM+
+    # Elementos que retorna
+    # Un archivo ".csv" con los valores de velocidad para la capa inlet listo para pasar a Star ccm+
+    # La imagen del decaimiento de la coherencia con el aumento de la frecuencia
     
     ##==========================================================================
-    ##================== Inicializaci�n de variables ===========================
+    ##================== Inicializacion de variables ===========================
     ##==========================================================================
-    
-    ## Extraccion de las coordenadas. En el caso Ejemplo X e Y son 0
-    #X=M[:,0]
-    #Y=M[:,1] 
-    #Z=M[:,2] # x and y coordinates vector at the inflow plane
 
     nd=Z.shape[0] # Generar numero de puntos. Termina siendo el numero de filas de M
     
@@ -97,17 +55,6 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     ## Informacion temporal
     lim_tt=(nt*dt)-dt # Limite de tiempo
     tt=np.arange(0,lim_tt+dt,dt) # Vector de tiempo
-    
-    ## Abrir los archivos y acomodarlos de la forma que se requiere para STAR CCM+
-    fid2 = open('TablaVelocidades.csv','w')
-    #Escribo las cabezeras de los archivos (primer fila)
-    csvHead='X,Y,Z,'
-    fid2.write(csvHead)
-
-    for i in range(tt.shape[0]):
-        cadena='ux(m/s)[t='+str(tt[i])+'], '+'vx(m/s)[t='+str(tt[i])+'], '+'wx(m/s)[t='+str(tt[i])+'], '
-        fid2.write(cadena)
-
 
     ## Calcular la velocidad promedio dado que
     # Uh es la velocidad promedio a una altura de referencia
@@ -147,8 +94,15 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
         wn[:,nmi]=wn[:,nmi]/np.std(wn[:,nmi])*2*np.pi*df
         wn[:,nmi]=wn[:,nmi]+fm[nmi]*2*np.pi
 
+    #================================================================================================
+    #=============================== Abir los archivos csv ==========================================
+    #================================================================================================  
+    fid2=archivos.AbrirArchivos(tt)
 
-    ##==========================================================================
+
+    #================================================================================================
+    #========================== Calcular espectros de frecuencia ====================================
+    #================================================================================================
     ## Creo las matrices del espectro
     # nm es el numero de segmentos, nd cantidad de puntos
     Su=np.zeros((nm,nd))
@@ -178,15 +132,16 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     # Uav Vetor de velocidad promedio a diferentes alturas
     UavLs=np.mean(Uav) # No se utiliza para nada
 
-    ##============================ Generate of P,Q,K Matrices====================================
+    #=============================================================================================
+    #============================= Generar P, Q y las matriz K ===================================
+    #=============================================================================================
     # nm es el numero de segmentos de frecuencia, nf Número de frecuencias aleatorias en un segmento.
     # Matriz (nf x 3 x nm) Estos, por cada segmento de frecuencia se tiene una matriz de (nf x 3), es decir
     # que por cada frecuencia dentro del segmento se tiene un valor para cada direccion. 
+
     K=np.zeros((nf,3,nm))
     r=np.random.randn(nf,3,nm) #Matriz nf filas, 3 columnas, nm capaz random con distribucion aleatoria media 0 desviacion 1
-    #P=r/abs(r)*np.sqrt(1/nf*np.power(r,2)/(1+np.power(r,2)))
     P=np.sign(r)*np.sqrt(1/nf*np.power(r,2)/(1+np.power(r,2))) # p eq (6)
-    #Q=r/abs(r)*np.sqrt(1/nf*1**2/(1+np.power(r,2)))
     Q=np.sign(r)*np.sqrt(1/nf*1**2/(1+np.power(r,2))) # q eq (6)
 
     Ls=np.zeros((nm,3,nd)) # parametro de la longitud de escala eq(7)
@@ -207,14 +162,17 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
             
             Ls[nmi,:,nyi]=Uav[nyi]/fm[nmi]/Cxyz/Gammai # Esto es Uav/(gamma*Cxyz*fm)
         
-        K[:,:,nmi]=RandSampleSphere(nf) # Coordenadas uniformemente distribuidas en una esfera de radio unitario
-        
+        K[:,:,nmi]=fun.RandSampleSphere(nf) # Coordenadas uniformemente distribuidas en una esfera de radio unitario
+
         for i in range(nf):
             XX=K[i,:,nmi].transpose()
-            resMapp=mapp(XX,P[i,:,nmi],Q[i,:,nmi]).transpose() # Ecuacion 3 paper, no se para que se usa esta variable Parece que la meti yo
-            K[i,:,nmi]=mapp(XX,P[i,:,nmi],Q[i,:,nmi]).transpose() # Ecuacion 3 paper
+            resMapp=fun.mapp(XX,P[i,:,nmi],Q[i,:,nmi]).transpose() # Ecuacion 3 paper, no se para que se usa esta variable Parece que la meti yo
+            K[i,:,nmi]=fun.mapp(XX,P[i,:,nmi],Q[i,:,nmi]).transpose() # Ecuacion 3 paper
 
-    ## Generar los campos de velocidad
+    #=============================================================================================
+    #============================ Generar los campos de velocidad ================================
+    #=============================================================================================
+
     U=np.zeros((nd,nt))
     V=np.zeros((nd,nt))
     W=np.zeros((nd,nt))
@@ -229,8 +187,6 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     for inxyi in range(nd):
         for nmi in range(nm):
 
-
-            #xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],Y[inxyi],Z[inxyi]]) # eq(4) del paper
             xjbar=1/Ls[nmi,:,inxyi]*np.array([X[inxyi],auxZeros[inxyi],Z[inxyi]]) # eq(4) del paper
             kjxj[:,0]=(xjbar[0]*K[:,0,nmi]+xjbar[1]*K[:,1,nmi]+xjbar[2]*K[:,2,nmi])
 
@@ -253,49 +209,14 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
         ## Sumarle la velocidad media
         U[inxyi,:]=U[inxyi,:]+Uav[inxyi] # Porque solo en dirección longitudinal? 
 
-    ## Pruebo el calculo de la coherencia entre dos puntos
-    fs = 5e1
-    f, Cxy = signal.coherence(U[0,:], U[3,:],fs,window='hann')
-    plt.semilogy(f, Cxy)
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('Coherence')
-    plt.show()
+    ## Calcular el decaimiento de la coherencia con el aumento de la frecuencia
+    val.DecaimientoCoherencia(U,0,3)
 
-    ## Pasar a los archivos csv
+    #================================================================================================
+    #=============================== Pasar a los archivos csv =======================================
+    #================================================================================================
 
-    TablaVel = np.zeros((X.shape[0],U.shape[1]+V.shape[1]+ W.shape[1] +3))
-
-    TablaVel[:,0]=X[:,0]
-
-    indY=0
-    indZ=0
-    while indY < TablaVel.shape[0]:
-        TablaVel[indY:indY+Z.shape[0],1]= Y[indZ]
-        TablaVel[indY:indY+Z.shape[0],2]= Z[:]
-        indY=indY+Z.shape[0]
-        indZ=indZ+1
-
-    
-    indExt=0
-    while indExt < TablaVel.shape[0]:
-        indVel=3
-        indTab=0
-        while indVel < TablaVel.shape[1]:
-            TablaVel[indExt:indExt+Z.shape[0],indVel]= U[:,indTab]
-            TablaVel[indExt:indExt+Z.shape[0],indVel+1]= V[:,indTab]
-            TablaVel[indExt:indExt+Z.shape[0],indVel+2]= W[:,indTab]
-            indVel=indVel+3
-            indTab=indTab+1
-        indExt=indExt+Z.shape[0]
-    
-    for i in range(TablaVel.shape[0]):
-        fid2.write('\n')
-        for j in range(TablaVel.shape[1]):
-            cadena= str(TablaVel[i,j]) + ","
-            fid2.write(cadena)
-
-    
-    fid2.close()
+    archivos.CargarDatos(fid2, X, Y, Z, U, V, W)
 
 
 

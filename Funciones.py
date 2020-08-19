@@ -24,6 +24,7 @@ def RandSampleSphere(N):
     # de forma aleatoria dentro de una esfera de radio unitario, 
     # tiene como fin mantener la condicion de libre divergencia.
     # Satisface la ecuacion 3 del paper de Aboshosha
+    np.random.seed(None) # Para inicializar los ramdom con el tiempo
     t0z=2*math.pi*np.random.rand(N,1) # vector de numeros aleatorio de N filas por 1 columna
     z=np.sin(t0z)
     t=2*math.pi*np.random.rand(N,1)# vector de numeros aleatorio de N filas por 1 columna

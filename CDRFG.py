@@ -45,7 +45,7 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     ##==========================================================================
     ##================== Inicializacion de variables ===========================
     ##==========================================================================
-
+    np.random.seed(None) # Para inicializar los ramdom con el tiempo
     nd=Z.shape[0] # Generar numero de puntos. Termina siendo el numero de filas de M
     
     ## Infomacion de la frecuencia

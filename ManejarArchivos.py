@@ -20,6 +20,7 @@ def CargarDatos(archivo, vectorPuntosX, vectorPuntosY, vectorPuntosZ, vectorU, v
 
     TablaVel[:,0]=vectorPuntosX[:,0]
 
+    ## Cargo los puntos de Y junto con Z
     indY=0
     indZ=0
     while indY < TablaVel.shape[0]:
@@ -35,7 +36,10 @@ def CargarDatos(archivo, vectorPuntosX, vectorPuntosY, vectorPuntosZ, vectorU, v
         indTab=0
         while indVel < TablaVel.shape[1]:
             TablaVel[indExt:indExt+vectorPuntosZ.shape[0],indVel]= vectorU[:,indTab]
-            TablaVel[indExt:indExt+vectorPuntosZ.shape[0],indVel+1]= vectorV[:,indTab]
+            if (np.count_nonzero(TablaVel[indExt:indExt+vectorPuntosZ.shape[0],1]<0) > 0):
+                TablaVel[indExt:indExt+vectorPuntosZ.shape[0],indVel+1]= -1 * vectorV[:,indTab]
+            else:
+                TablaVel[indExt:indExt+vectorPuntosZ.shape[0],indVel+1]= vectorV[:,indTab]
             TablaVel[indExt:indExt+vectorPuntosZ.shape[0],indVel+2]= vectorW[:,indTab]
             indVel=indVel+3
             indTab=indTab+1

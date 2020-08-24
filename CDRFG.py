@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import csv
+from stl import mesh
 
 import Funciones as fun
 import Validar as val
@@ -162,7 +163,51 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     #=============================== Pasar a los archivos csv =======================================
     #================================================================================================
 
-    archivos.CargarDatos(fid2, X, Y, Z, U, V, W)
+    archivos.CargarDatos(fid2, tt, X, Y, Z, U, V, W)
+
+    #================================================================================================
+    #=============================== Crear Archivo SLT ==============================================
+    #================================================================================================
+
+    verticesAux=np.empty([1, 3])
+    for indPuntosZ in range(Z.shape[0]):
+        for indPuntosY in range(Y.shape[0]):
+            aux = np.array([[0,Y[indPuntosY],Z[indPuntosZ]]])
+            verticesAux = np.concatenate((verticesAux,aux))
+    
+    vertices = np.zeros((verticesAux.shape[0]-1,verticesAux.shape[1]))
+    vertices[:,:]=verticesAux[1:verticesAux.shape[0],:]
+    print('Vertices completos')
+    indVertices=0
+    facesAux=np.empty([1, 3], dtype=int)
+    contadorLinea=1
+    while indVertices <= (vertices.shape[0]-Y.shape[0]-2):
+        if(indVertices==((Y.shape[0]*contadorLinea)-1)):
+            contadorLinea = contadorLinea + 1
+        else:
+            aux = np.array([[indVertices,indVertices+Y.shape[0]+1,indVertices+Y.shape[0]]])
+            facesAux = np.concatenate((facesAux,aux))
+            aux = np.array([[indVertices,indVertices+1,indVertices+Y.shape[0]+1]])
+            facesAux = np.concatenate((facesAux,aux))
+        indVertices=indVertices+1
+    
+    faces = np.zeros((facesAux.shape[0]-1,facesAux.shape[1]))
+    faces[:,:]=facesAux[1:facesAux.shape[0],:]
+    print('Faces completos')
+
+    # Create the mesh
+    grilla = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
+    for i, f in enumerate(faces):
+        for j in range(3):
+            grilla.vectors[i][j] = vertices[int(f[j]),:]
+
+    # Write the mesh to file "grilla.stl"
+    grilla.save('Grilla.stl')
+ 
+        
+
+
+
 
 
 
@@ -206,7 +251,8 @@ def main():
     dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo Seguro para mantener el numero de número de Courant
     nt=1000 #Cantidad de pasos de tiempo
     Z= np.arange(0.05,1.3,0.05) # Altura del dominio. 1.3 m
-    Y= np.arange(-1.00,1.25,0.25) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
+    pasoDimensionY=2/7
+    Y= np.arange(-1.00,1+pasoDimensionY,pasoDimensionY) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
     X=np.zeros((Z.shape[0]*Y.shape[0],1))
 
     CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)

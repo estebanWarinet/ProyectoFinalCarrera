@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import csv
 
 def AbrirArchivos(vectorTiempo):
@@ -14,7 +15,7 @@ def AbrirArchivos(vectorTiempo):
 
     return fid2
 
-def CargarDatos(archivo, vectorPuntosX, vectorPuntosY, vectorPuntosZ, vectorU, vectorV, vectorW):
+def CargarDatos(archivo, vectorTiempo, vectorPuntosX, vectorPuntosY, vectorPuntosZ, vectorU, vectorV, vectorW):
     
     TablaVel = np.zeros((vectorPuntosX.shape[0],vectorU.shape[1]+vectorV.shape[1]+ vectorW.shape[1] +3))
 
@@ -53,3 +54,43 @@ def CargarDatos(archivo, vectorPuntosX, vectorPuntosY, vectorPuntosZ, vectorU, v
 
     
     archivo.close()
+
+    ##==========================================================================
+    ##============= Cargar archivo .wind =======================================
+    ##==========================================================================
+
+    archivoWind = open('Vientos.wind', 'w')
+    cadena='1 0 0 \n'
+    archivoWind.write(cadena) 
+
+    cadena=str(vectorTiempo.shape[0])+' '+str(vectorPuntosY.shape[0])+' '+str(vectorPuntosZ.shape[0])+'\n'
+    archivoWind.write(cadena)
+    archivoWind.write(str(vectorTiempo[:])[1:-1])
+    archivoWind.write('\n')
+    archivoWind.write(str(vectorPuntosY[:])[1:-1])
+    archivoWind.write('\n')
+    archivoWind.write(str(vectorPuntosZ[:])[1:-1])
+    archivoWind.write('\n')
+
+    for indTemp in range(vectorTiempo.shape[0]):
+        for indPuntosY in range(vectorPuntosY.shape[0]):
+            archivoWind.write(np.array2string(vectorU[:,indTemp], precision=2, separator=' ')[1:-1])
+            archivoWind.write(' ')
+    
+    archivoWind.write('\n')
+
+    for indTemp in range(vectorTiempo.shape[0]):
+        for indPuntosY in range(vectorPuntosY.shape[0]):
+            archivoWind.write(np.array2string(vectorV[:,indTemp], precision=2, separator=' ')[1:-1])
+            archivoWind.write(' ')
+    
+    archivoWind.write('\n')
+
+    for indTemp in range(vectorTiempo.shape[0]):
+        for indPuntosY in range(vectorPuntosY.shape[0]):
+            archivoWind.write(np.array2string(vectorW[:,indTemp], precision=2, separator=' ')[1:-1])
+            archivoWind.write(' ')
+    
+    archivoWind.write('\n')
+    
+    archivoWind.close()

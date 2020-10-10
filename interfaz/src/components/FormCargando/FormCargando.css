@@ -1,0 +1,16 @@
+.OrdenCentradoVerticalCargando{
+    display:flex;
+    
+    align-items: center; 
+    flex-direction : column;
+}
+
+.FlexHijoBarra{
+    flex : 1 1 auto; 
+    align-self: flex-start;
+}
+
+.button{
+    flex : 1 1 auto; 
+    align-self: flex-end;
+}

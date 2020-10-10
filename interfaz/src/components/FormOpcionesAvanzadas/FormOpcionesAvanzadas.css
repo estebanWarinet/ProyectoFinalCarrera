@@ -1,0 +1,29 @@
+.divider {
+    width: 1px;
+    background-color: black;
+    margin-left: 20px;
+    margin-right: 20px;
+    height: 1cm;
+}
+
+.flexHorizontalOpcionesAvanzadas{
+    display:flex;
+    flex : 1 ; 
+    justify-content: space-around;
+}
+
+.CajasCentradasOpcionesAvanzadas{
+    display:flex;
+    flex : 1 1 auto; 
+    align-items: center; 
+    justify-content : center; 
+    flex-direction : column;
+}
+
+.inputMargenInferior{
+    margin-bottom: 20px;
+}
+
+.groupbox-border{
+    margin-bottom: 20px;
+}

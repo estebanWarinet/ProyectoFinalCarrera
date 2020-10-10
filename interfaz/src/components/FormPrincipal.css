@@ -1,0 +1,19 @@
+div[disabled]
+{
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.CajasCentradas{
+    display:flex;
+    flex : 1 ; 
+    align-items: center; 
+    justify-content : center; 
+    flex-direction : column;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}

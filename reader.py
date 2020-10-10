@@ -1,4 +1,11 @@
 #!/usr/bin/python
+from scipy.interpolate import griddata
+import numpy as np
+import matplotlib
+#matplotlib.use('agg')
+import matplotlib.pyplot as plt
+from stl import mesh
+
 if 1:
     #filename = 'Turb15_rect21x21_100s.wind'
     filename = 'Vientos.wind'
@@ -13,8 +20,7 @@ if 1:
     data['Ux'] = []
     data['Uy'] = []
     data['Uz'] = []
-    import numpy as np
-    
+
     aux = []
     with open(filename, mode='r') as windfile:
         iline = 0
@@ -120,9 +126,7 @@ if 1:
                 
         windfile.close()
         
-    import matplotlib
-    #matplotlib.use('agg')
-    import matplotlib.pyplot as plt
+
     
     data['Y'] = np.array(data['Y'])
     data['Z'] = np.array(data['Z'])
@@ -141,11 +145,13 @@ if 1:
             plt.draw()
             plt.pause(0.1)
 
-from stl import mesh
+
 #stlmesh = mesh.Mesh.from_file('Inlet_swt23_300p.stl')
 stlmesh = mesh.Mesh.from_file('Grilla.stl')
+#stlmesh = mesh.Mesh.from_file('GrillaGerardoBin.stl')
+#stlmesh = mesh.Mesh.from_file('GrillaGerardoCode.stl')
 
-from scipy.interpolate import griddata
+
 
 # extraer todos los centroides
 Xc = []
@@ -197,7 +203,8 @@ with open('TablaVelocidadesInterpolada.csv', 'w') as csvfile:
         fieldnames.append('Uy(m/s)[t=%3.5fs]'%data['times'][it])
     for it in range(data['nt']):
         fieldnames.append('Uz(m/s)[t=%3.5fs]'%data['times'][it])
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames,delimiter=' ')
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames,delimiter=',')
+    #writer = csv.DictWriter(csvfile, fieldnames=fieldnames,delimiter=' ')
 
     writer.writeheader()
     

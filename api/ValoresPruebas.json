@@ -1,0 +1,47 @@
+{
+    "DatosEntrada": [
+      {
+        "datos": {
+          "datosGrilla": {
+            "stateConGrilla": false,
+            "archivoGrilla": "",
+            "valorMinimoY": "-1.00",
+            "valorMaximoY": "1.00",
+            "valorMinimoZ": "0.05",
+            "valorMaximoZ": "1.3"
+          },
+          "datosNecesarios": {
+            "escala": "500",
+            "alturaReferencia": "0.3644",
+            "velocidadMedia": "10.0",
+            "exponenteVelocidad": "0.3264",
+            "alturaReferenciaIntensidad":"0.3364",
+            "intensidadLong": "0.2084",
+            "intensidadTransv": "0.1815",
+            "intensidadVerti": "0.1523",
+            "intensidadExpLong": "-0.1914",
+            "intensidadExpTransv": "-0.1228",
+            "intensidadExpVerti": "-0.0048",
+            "alturaReferenciaEscalaLong":"0.254",
+            "escalaLongLong": "0.302",
+            "escalaLongTransv": "0.0815",
+            "escalaLongVerti": "0.0326",
+            "escalaLongExpLong": "0.473",
+            "escalaLongExpTransv": "0.8813",
+            "escalaLongExpVerti": "1.5390"
+          },
+          "datosAvanzados": {
+            "opAv_ConstDecaimiento": "10",
+            "opAv_CantSegmentos": "50",
+            "opAv_CantFrecuencias": "100",
+            "opAv_FrecMaxima": "100",
+            "opAv_CantPasosTemp": "1000",
+            "opAv_PasoEspacial": "0.05",
+            "opAv_PasoGrilla": "0.2857",
+            "opAv_DistCaracteristica": 0.3
+          }
+        },
+        "id": 1
+      }
+    ]
+  }

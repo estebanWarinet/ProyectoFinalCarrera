@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import math
 import csv
@@ -211,7 +212,7 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
 
 
 
-def main(): 
+def main(datos): 
     ## La escala  que uso Aboshosha es de 1:500
     ## Las medidas del edificio son Height Hs 182.2, width Ws 30.48, depth Ds 30.48
     h0u=0.3644 # Altura de referencia para la velocidad media Tabla |

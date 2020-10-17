@@ -4,22 +4,22 @@ import React from 'react';
 class SinGrilla extends React.Component {
 
     componentDidMount(){
-        this.props.onChange("archivoGrilla","")
+        this.props.onChange("datosGrilla","archivoGrilla","")
     }
 
     controlarCambioInput = (event) => {
         switch (event.target.name) {
             case "MinimoY":
-                this.props.onChange("valorMinimoY",event.target.value);
+                this.props.onChange("datosGrilla","valorMinimoY",event.target.value);
                 break;
             case "MaximoY":
-                this.props.onChange("valorMaximoY",event.target.value);
+                this.props.onChange("datosGrilla","valorMaximoY",event.target.value);
                 break;
             case "MinimoZ":
-                this.props.onChange("valorMinimoZ",event.target.value);
+                this.props.onChange("datosGrilla","valorMinimoZ",event.target.value);
                 break;
             case "MaximoZ":
-                this.props.onChange("valorMaximoZ",event.target.value);
+                this.props.onChange("datosGrilla","valorMaximoZ",event.target.value);
                 break;
             default :
                 break;

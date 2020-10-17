@@ -10,8 +10,8 @@ class BotononesInferiores extends React.Component {
                 <div className = "column">
                     <button className = "ui button">Descargar</button>
                 </div>
-                <div className = "column" align = "right">
-                    <Link to="/Generando" className = "ui button">
+                <div className = "column" align = "right" >
+                    <Link to="/Generando" className = "ui button" onClick = {this.props.generarDatos}>
                         Generar
                     </Link>
                     <button className = "ui button" onClick = {this.props.limpiarDatos}>Limpiar</button>

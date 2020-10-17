@@ -5,19 +5,17 @@ import SinGrilla from './SinGrilla';
 
 
 class FormGrillaControl extends React.Component{
-
-    state = {stateConGrilla: true}
     
     activarConGrilla = () => {
-        this.setState({stateConGrilla : true});
+        this.props.onChange("datosGrilla","stateConGrilla",true);
     }
 
     activarSinGrilla = () =>{
-        this.setState({stateConGrilla : false});
+        this.props.onChange("datosGrilla","stateConGrilla",false);
     }
 
     renderOpcionGrilla = () =>{
-        if (this.state.stateConGrilla){
+        if (this.props.stateConGrilla){
             return (
                 <div>
                     <ConGrilla
@@ -43,7 +41,7 @@ class FormGrillaControl extends React.Component{
     render(){
         var itemConGrilla = "active item";
         var itemSinGrilla = "item";
-        if (!this.state.stateConGrilla){
+        if (!this.props.stateConGrilla){
             itemConGrilla = "item";
             itemSinGrilla = "active item";
         }

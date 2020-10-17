@@ -5,16 +5,16 @@ class IngresoDatosGenerales extends React.Component{
     controlarCambioInput = (event) => {
         switch (event.target.name) {
             case "escala":
-                this.props.onChange("escala",event.target.value)
+                this.props.onChange("camposNecesarios","escala",event.target.value)
                 break;
             case "altReferencia":
-                this.props.onChange("alturaReferencia",event.target.value)
+                this.props.onChange("camposNecesarios","alturaReferencia",event.target.value)
                 break;
             case "velMedia":
-                this.props.onChange("velocidadMedia",event.target.value)
+                this.props.onChange("camposNecesarios","velocidadMedia",event.target.value)
                 break;
             case "expVelocidad":
-                this.props.onChange("exponenteVelocidad",event.target.value)
+                this.props.onChange("camposNecesarios","exponenteVelocidad",event.target.value)
                 break;
             default :
                 break;

@@ -6,22 +6,22 @@ class TablasExponentes extends React.Component{
     controlarCambioInputIntensidades = (event) => {
         switch (event.target.name) {
             case "IntLong":
-                this.props.onChange("intensidadLong",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadLong",event.target.value)
                 break;
             case "IntTrans":
-                this.props.onChange("intensidadTransv",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadTransv",event.target.value)
                 break;
             case "IntVert":
-                this.props.onChange("intensidadVerti",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadVerti",event.target.value)
                 break;
             case "ExpLong":
-                this.props.onChange("intensidadExpLong",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadExpLong",event.target.value)
                 break;
             case "ExpTrans":
-                this.props.onChange("intensidadExpTransv",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadExpTransv",event.target.value)
                 break;
             case "ExpVert":
-                this.props.onChange("intensidadExpVerti",event.target.value)
+                this.props.onChange("camposNecesarios","intensidadExpVerti",event.target.value)
                 break;
             default :
                 break;
@@ -31,22 +31,22 @@ class TablasExponentes extends React.Component{
     controlarCambioInputEscalaLong = (event) => {
         switch (event.target.name) {
             case "IntLong":
-                this.props.onChange("escalaLongLong",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongLong",event.target.value)
                 break;
             case "IntTrans":
-                this.props.onChange("escalaLongTransv",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongTransv",event.target.value)
                 break;
             case "IntVert":
-                this.props.onChange("escalaLongVerti",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongVerti",event.target.value)
                 break;
             case "ExpLong":
-                this.props.onChange("escalaLongExpLong",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongExpLong",event.target.value)
                 break;
             case "ExpTrans":
-                this.props.onChange("escalaLongExpTransv",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongExpTransv",event.target.value)
                 break;
             case "ExpVert":
-                this.props.onChange("escalaLongExpVerti",event.target.value)
+                this.props.onChange("camposNecesarios","escalaLongExpVerti",event.target.value)
                 break;
             default :
                 break;

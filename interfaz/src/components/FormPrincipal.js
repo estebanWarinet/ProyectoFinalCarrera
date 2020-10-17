@@ -1,10 +1,12 @@
 import React from 'react';
 
-
 import GrillaControl from './FormGrillaControl';
 import IngresoDatos from './FormIngresoDatos/FormIngresoDatos';
 import OpcionesAvazadas from './FormOpcionesAvanzadas/FormOpcionesAvanzadas';
 import BotonesInferiores from './BotononesInferiores';
+import ApiAddress from './Api/Api';
+import history from './history';
+
 import './FormPrincipal.css';
 
 
@@ -12,70 +14,20 @@ class FormPrincipal extends React.Component{
 
     state = {
         opcionesAvanzadasActive : true,
-        archivoGrilla : "",
-        valorMinimoY: "",
-        valorMaximoY: "",
-        valorMinimoZ: "",
-        valorMaximoZ: "", 
-        escala : "",
-        alturaReferencia : "",
-        velocidadMedia : "",
-        exponenteVelocidad : "",
-        intensidadLong : "",
-        intensidadTransv : "",
-        intensidadVerti : "",
-        intensidadExpLong : "",
-        intensidadExpTransv : "",
-        intensidadExpVerti : "",
-        escalaLongLong : "",
-        escalaLongTransv : "",
-        escalaLongVerti : "",
-        escalaLongExpLong : "",
-        escalaLongExpTransv : "",
-        escalaLongExpVerti : "",
-        opAv_ConstDecaimiento : "",
-        opAv_CantSegmentos : "",
-        opAv_CantFrecuencias : "",
-        opAv_FrecMaxima : "",
-        opAv_CantPasosTemp : "",
-        opAv_PasoEspacial : "",
-        opAv_DistCaracteristica : 0.5,
-        opAv_PasoGrilla : ""
-    }
-
-    setEstados = (estado,valor) => {
-        this.setState({
-            [estado] : valor
-        });
-    }
-
-    limpiarDatosAvanzados = () => {
-        this.setState(
-            {
-                opAv_ConstDecaimiento : "",
-                opAv_CantSegmentos : "",
-                opAv_CantFrecuencias : "",
-                opAv_FrecMaxima : "",
-                opAv_CantPasosTemp : "",
-                opAv_PasoEspacial : "",
-                opAv_DistCaracteristica : 0.5,
-                opAv_PasoGrilla : ""
-            }
-        );
-    }
-
-    limpiarDatos = () => {
-        this.setState({
+        datosGrilla : {
+            stateConGrilla: true,
             archivoGrilla : "",
-            valorMinimoY: "",
-            valorMaximoY: "",
-            valorMinimoZ: "",
-            valorMaximoZ: "", 
+            valorMinimoY: "", 
+            valorMaximoY: "", 
+            valorMinimoZ: "", 
+            valorMaximoZ: "",
+        },
+        camposNecesarios : {
             escala : "",
             alturaReferencia : "",
             velocidadMedia : "",
             exponenteVelocidad : "",
-            intensidadLong : "",
+            intensidadLong : "", 
             intensidadTransv : "",
             intensidadVerti : "",
             intensidadExpLong : "",
@@ -87,8 +39,109 @@ class FormPrincipal extends React.Component{
             escalaLongExpLong : "",
             escalaLongExpTransv : "",
             escalaLongExpVerti : ""
+        },
+        camposOpcionesAvanzadas : {
+            opAv_ConstDecaimiento : "",
+            opAv_CantSegmentos : "",
+            opAv_CantFrecuencias : "",
+            opAv_FrecMaxima : "",
+            opAv_CantPasosTemp : "",
+            opAv_PasoEspacial : "",
+            opAv_PasoGrilla : ""
+        },
+        opAv_DistCaracteristica : 0.5,
+    }
+
+    limpiarEstadosParticulares = (estado,valor) =>{
+        this.setState({
+            camposOpcionesAvanzadas: {
+                ...this.state.camposOpcionesAvanzadas,
+                [estado]: valor
+            }
         });
-        this.limpiarDatosAvanzados();
+    }
+
+    setEstados = (nombre,estado,valor) => {
+        switch (nombre){
+            case "datosGrilla":
+                this.setState({
+                    datosGrilla: {
+                        ...this.state.datosGrilla,
+                        [estado]: valor
+                    }
+                });
+                break;
+            case "camposNecesarios":
+                this.setState({
+                    camposNecesarios: {
+                        ...this.state.camposNecesarios,
+                        [estado]: valor
+                    }
+                });
+                break;
+            case "camposOpcionesAvanzadas":
+                this.setState({
+                    camposOpcionesAvanzadas: {
+                        ...this.state.camposOpcionesAvanzadas,
+                        [estado]: valor
+                    }
+                });
+                break;
+            case "opAv_DistCaracteristica":
+                this.setState({
+                    [estado]: valor
+                });
+                break;
+            default:
+                break;
+        }
+    }
+
+    limpiarDatos = () => {
+        //this.setState({
+        //    archivoGrilla : "",
+        //    valorMinimoY: "",
+        //    valorMaximoY: "",
+        //    valorMinimoZ: "",
+        //    valorMaximoZ: "", 
+        //    escala : "",
+        //    alturaReferencia : "",
+        //    velocidadMedia : "",
+        //    exponenteVelocidad : "",
+        //    intensidadLong : "",
+        //    intensidadTransv : "",
+        //    intensidadVerti : "",
+        //    intensidadExpLong : "",
+        //    intensidadExpTransv : "",
+        //    intensidadExpVerti : "",
+        //    escalaLongLong : "",
+        //    escalaLongTransv : "",
+        //    escalaLongVerti : "",
+        //    escalaLongExpLong : "",
+        //    escalaLongExpTransv : "",
+        //    escalaLongExpVerti : ""
+        //});
+        //this.limpiarDatosAvanzados();
+        
+    }
+
+    manejarArchivo = () => {
+        const formData = new FormData();
+        return formData.append('file', this.state.archivoGrilla);
+    }
+
+    onSubmit = async () => {
+        //console.log(this.controlarOpcionesVacias())
+        const datosGrilla = this.state.datosGrilla;
+        const datosNecesarios = this.state.camposNecesarios;
+        const datosOpcionesAvanzadas = this.state.camposOpcionesAvanzadas;
+        const opAv_DistCaracteristica = this.state.opAv_DistCaracteristica;
+        const datosAvanzados = {...datosOpcionesAvanzadas,opAv_DistCaracteristica}
+        const datos = {datosGrilla, datosNecesarios, datosAvanzados}
+        await ApiAddress.post('/DatosEntrada',{
+            datos
+        });
+        history.push('/Generando');
     }
 
     controlarCambioOpcionesAvanzadas = () => {
@@ -98,7 +151,30 @@ class FormPrincipal extends React.Component{
             this.setState({opcionesAvanzadasActive : true});
         }
         this.limpiarDatosAvanzados();
-        
+    }
+
+    limpiarDatosAvanzados = () => {
+        //this.setState(
+        //    {
+        //        opAv_ConstDecaimiento : "",
+        //        opAv_CantSegmentos : "",
+        //        opAv_CantFrecuencias : "",
+        //        opAv_FrecMaxima : "",
+        //        opAv_CantPasosTemp : "",
+        //        opAv_PasoEspacial : "",
+        //        opAv_DistCaracteristica : 0.5,
+        //        opAv_PasoGrilla : ""
+        //    }
+        //);
+        Object.keys(this.state.camposOpcionesAvanzadas).map(i => {
+            this.setState({
+                camposOpcionesAvanzadas: {
+                    ...this.state.camposOpcionesAvanzadas,
+                    [i]: ""
+                }
+            });
+        });
+        console.log(this.state.camposOpcionesAvanzadas);
     }
 
     render(){
@@ -107,31 +183,32 @@ class FormPrincipal extends React.Component{
                 <div className = "CajasCentradas" >
                     <div style = {{marginBottom : 20}}> 
                         <GrillaControl
-                            archivoGrilla = {this.state.archivoGrilla}
-                            valorMinimoY = {this.state.valorMinimoY}
-                            valorMaximoY = {this.state.valorMaximoY}
-                            valorMinimoZ = {this.state.valorMinimoZ}
-                            valorMaximoZ = {this.state.valorMaximoZ}
+                            stateConGrilla = {this.state.datosGrilla.stateConGrilla}
+                            archivoGrilla = {this.state.datosGrilla.archivoGrilla}
+                            valorMinimoY = {this.state.datosGrilla.valorMinimoY}
+                            valorMaximoY = {this.state.datosGrilla.valorMaximoY}
+                            valorMinimoZ = {this.state.datosGrilla.valorMinimoZ}
+                            valorMaximoZ = {this.state.datosGrilla.valorMaximoZ}
                             onChange = {this.setEstados}
                         /> 
                     </div>
                     <IngresoDatos
-                        escala = {this.state.escala}
-                        alturaReferencia = {this.state.alturaReferencia}
-                        velocidadMedia = {this.state.velocidadMedia}
-                        exponenteVelocidad = {this.state.exponenteVelocidad}
-                        intensidadLong = {this.state.intensidadLong}
-                        intensidadTransv = {this.state.intensidadTransv}
-                        intensidadVerti = {this.state.intensidadVerti}
-                        intensidadExpLong = {this.state.intensidadExpLong}
-                        intensidadExpTransv = {this.state.intensidadExpTransv}
-                        intensidadExpVerti = {this.state.intensidadExpVerti}
-                        escalaLongLong = {this.state.escalaLongLong}
-                        escalaLongTransv = {this.state.escalaLongTransv}
-                        escalaLongVerti = {this.state.escalaLongVerti}
-                        escalaLongExpLong = {this.state.escalaLongExpLong}
-                        escalaLongExpTransv = {this.state.escalaLongExpTransv}
-                        escalaLongExpVerti = {this.state.escalaLongExpVerti}
+                        escala = {this.state.camposNecesarios.escala}
+                        alturaReferencia = {this.state.camposNecesarios.alturaReferencia}
+                        velocidadMedia = {this.state.camposNecesarios.velocidadMedia}
+                        exponenteVelocidad = {this.state.camposNecesarios.exponenteVelocidad}
+                        intensidadLong = {this.state.camposNecesarios.intensidadLong}
+                        intensidadTransv = {this.state.camposNecesarios.intensidadTransv}
+                        intensidadVerti = {this.state.camposNecesarios.intensidadVerti}
+                        intensidadExpLong = {this.state.camposNecesarios.intensidadExpLong}
+                        intensidadExpTransv = {this.state.camposNecesarios.intensidadExpTransv}
+                        intensidadExpVerti = {this.state.camposNecesarios.intensidadExpVerti}
+                        escalaLongLong = {this.state.camposNecesarios.escalaLongLong}
+                        escalaLongTransv = {this.state.camposNecesarios.escalaLongTransv}
+                        escalaLongVerti = {this.state.camposNecesarios.escalaLongVerti}
+                        escalaLongExpLong = {this.state.camposNecesarios.escalaLongExpLong}
+                        escalaLongExpTransv = {this.state.camposNecesarios.escalaLongExpTransv}
+                        escalaLongExpVerti = {this.state.camposNecesarios.escalaLongExpVerti}
                         onChange = {this.setEstados}
                     />
                 </div>
@@ -141,20 +218,20 @@ class FormPrincipal extends React.Component{
                 </div>
                 <div disabled = {this.state.opcionesAvanzadasActive} style = {{marginBottom : 20}}> 
                     < OpcionesAvazadas
-                    
-                        opAv_ConstDecaimiento = {this.state.opAv_ConstDecaimiento}
-                        opAv_CantSegmentos = {this.state.opAv_CantSegmentos}
-                        opAv_CantFrecuencias = {this.state.opAv_CantFrecuencias}
-                        opAv_FrecMaxima = {this.state.opAv_FrecMaxima}
-                        opAv_CantPasosTemp = {this.state.opAv_CantPasosTemp}
-                        opAv_PasoEspacial = {this.state.opAv_PasoEspacial}
+                        stateConGrilla = {this.state.datosGrilla.stateConGrilla}
+                        opAv_ConstDecaimiento = {this.state.camposOpcionesAvanzadas.opAv_ConstDecaimiento}
+                        opAv_CantSegmentos = {this.state.camposOpcionesAvanzadas.opAv_CantSegmentos}
+                        opAv_CantFrecuencias = {this.state.camposOpcionesAvanzadas.opAv_CantFrecuencias}
+                        opAv_FrecMaxima = {this.state.camposOpcionesAvanzadas.opAv_FrecMaxima}
+                        opAv_CantPasosTemp = {this.state.camposOpcionesAvanzadas.opAv_CantPasosTemp}
+                        opAv_PasoEspacial = {this.state.camposOpcionesAvanzadas.opAv_PasoEspacial}
                         opAv_DistCaracteristica = {this.state.opAv_DistCaracteristica}
-                        opAv_PasoGrilla = {this.state.opAv_PasoGrilla}
+                        opAv_PasoGrilla = {this.state.camposOpcionesAvanzadas.opAv_PasoGrilla}
                         onChange = {this.setEstados}
                     
                     />
                 </div>
-                < BotonesInferiores limpiarDatos = {this.limpiarDatos}/>
+                < BotonesInferiores limpiarDatos = {this.limpiarDatos} generarDatos = {this.onSubmit}/>
             </div>
         );
     }

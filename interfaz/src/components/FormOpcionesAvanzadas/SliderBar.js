@@ -11,7 +11,7 @@ class SliderBar extends React.Component{
     };
 
     controlarCambio = (event, value) =>{
-        this.props.onChange("opAv_DistCaracteristica", value)
+        this.props.onChange("opAv_DistCaracteristica","opAv_DistCaracteristica", value)
     }
 
     render(){

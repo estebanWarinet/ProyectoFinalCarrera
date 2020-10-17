@@ -8,5 +8,5 @@ def DecaimientoCoherencia (vector, primerPt, SegundoPt, fs = 5e1, ventana='hann'
     plt.semilogy(f, Cxy)
     plt.xlabel('frequency [Hz]')
     plt.ylabel('Coherence')
-    plt.show()
+    ##plt.show()
     plt.savefig('DecaimientoCoherencia.png')

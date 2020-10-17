@@ -9,8 +9,9 @@ import Validar as val
 import ManejarArchivos as archivos
 import EspectrosFrecuencias as espFrec
 import GenerarCamposVelocidad as genCamVel
+import InterpoladorEspacial as intEspacial
 
-def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z):
+def CDRFG_script(conGrilla,nombreArchivo,h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z):
 
     # Consistent DRFG Function By Aboshosha et al. (2015)
     # INPUT Parameters
@@ -169,94 +170,99 @@ def CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Lwh,dLu,d
     #================================================================================================
     #=============================== Crear Archivo SLT ==============================================
     #================================================================================================
-
-    verticesAux=np.empty([1, 3])
-    for indPuntosZ in range(Z.shape[0]):
-        for indPuntosY in range(Y.shape[0]):
-            aux = np.array([[0,Y[indPuntosY],Z[indPuntosZ]]])
-            verticesAux = np.concatenate((verticesAux,aux))
-    
-    vertices = np.zeros((verticesAux.shape[0]-1,verticesAux.shape[1]))
-    vertices[:,:]=verticesAux[1:verticesAux.shape[0],:]
-    print('Vertices completos')
-    indVertices=0
-    facesAux=np.empty([1, 3], dtype=int)
-    contadorLinea=1
-    while indVertices <= (vertices.shape[0]-Y.shape[0]-2):
-        if(indVertices==((Y.shape[0]*contadorLinea)-1)):
-            contadorLinea = contadorLinea + 1
-        else:
-            aux = np.array([[indVertices,indVertices+Y.shape[0]+1,indVertices+Y.shape[0]]])
-            facesAux = np.concatenate((facesAux,aux))
-            aux = np.array([[indVertices,indVertices+1,indVertices+Y.shape[0]+1]])
-            facesAux = np.concatenate((facesAux,aux))
-        indVertices=indVertices+1
-    
-    faces = np.zeros((facesAux.shape[0]-1,facesAux.shape[1]))
-    faces[:,:]=facesAux[1:facesAux.shape[0],:]
-    print('Faces completos')
-
-    # Create the mesh
-    grilla = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
-    for i, f in enumerate(faces):
-        for j in range(3):
-            grilla.vectors[i][j] = vertices[int(f[j]),:]
-
-    # Write the mesh to file "grilla.stl"
-    grilla.save('Grilla.stl')
- 
+    if(not conGrilla):
+        verticesAux=np.empty([1, 3])
+        for indPuntosZ in range(Z.shape[0]):
+            for indPuntosY in range(Y.shape[0]):
+                aux = np.array([[0,Y[indPuntosY],Z[indPuntosZ]]])
+                verticesAux = np.concatenate((verticesAux,aux))
         
+        vertices = np.zeros((verticesAux.shape[0]-1,verticesAux.shape[1]))
+        vertices[:,:]=verticesAux[1:verticesAux.shape[0],:]
+        print('Vertices completos')
+        indVertices=0
+        facesAux=np.empty([1, 3], dtype=int)
+        contadorLinea=1
+        while indVertices <= (vertices.shape[0]-Y.shape[0]-2):
+            if(indVertices==((Y.shape[0]*contadorLinea)-1)):
+                contadorLinea = contadorLinea + 1
+            else:
+                aux = np.array([[indVertices,indVertices+Y.shape[0]+1,indVertices+Y.shape[0]]])
+                facesAux = np.concatenate((facesAux,aux))
+                aux = np.array([[indVertices,indVertices+1,indVertices+Y.shape[0]+1]])
+                facesAux = np.concatenate((facesAux,aux))
+            indVertices=indVertices+1
+        
+        faces = np.zeros((facesAux.shape[0]-1,facesAux.shape[1]))
+        faces[:,:]=facesAux[1:facesAux.shape[0],:]
+        print('Faces completos')
+
+        # Create the mesh
+        grilla = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
+        for i, f in enumerate(faces):
+            for j in range(3):
+                grilla.vectors[i][j] = vertices[int(f[j]),:]
+
+        # Write the mesh to file "grilla.stl"
+        grilla.save('Grilla.stl')
+        nombreArchivo = 'Grilla.stl'
+
+    #================================================================================================
+    #=============================== Interpolador Espacial ==========================================
+    #================================================================================================
+
+    intEspacial.main(nombreArchivo)
 
 
 
+def main(datosGrilla,datosNecesarios,datosAvanzados): 
 
+    conGrilla = datosGrilla['stateConGrilla']
+    nombreArchivo = datosGrilla['archivoGrilla']
 
+    h0u=float(datosNecesarios['alturaReferencia'])
+    alphau=float(datosNecesarios['exponenteVelocidad'])
+    Uh=float(datosNecesarios['velocidadMedia'])
 
-def main(datos): 
-    ## La escala  que uso Aboshosha es de 1:500
-    ## Las medidas del edificio son Height Hs 182.2, width Ws 30.48, depth Ds 30.48
-    h0u=0.3644 # Altura de referencia para la velocidad media Tabla |
-    alphau=0.3264 # Exponente para la velocidad media               | -> Tabla 2
-    Uh=10.0 # Velocidad media de referencia                         |
-
-    h0I=0.3364 # Altura de referencia para la intesidad -> Revizar origen == # Altura de referencia para la velocidad media Tabla
+    h0I=float(datosNecesarios['alturaReferenciaIntensidad'])
     #--------Iuh,Ivh, Iwh son las intensidades longitudinal, transversal. Zou et al 2003 y ESDU 2001
-    Iuh=0.2084
-    Ivh=0.1815
-    Iwh=0.1523
+    Iuh=float(datosNecesarios['intensidadLong'])
+    Ivh=float(datosNecesarios['intensidadTransv'])
+    Iwh=float(datosNecesarios['intensidadVerti'])
     #------------------------------------
     #-------dIu, dIv, dIw exponentes de intesidad longitudinal, transversal y vertical. Zou et al 2003 y ESDU 2001
-    dIu=-0.1914
-    dIv=-0.1228
-    dIw=-0.0048
+    dIu=float(datosNecesarios['intensidadExpLong'])
+    dIv=float(datosNecesarios['intensidadExpTransv'])
+    dIw=float(datosNecesarios['intensidadExpVerti'])
     #------------------------------------
-    h0L=0.254 # Altura de referencia para la escala de longitud
+    h0L=float(datosNecesarios['alturaReferenciaEscalaLong']) # Altura de referencia para la escala de longitud
     #-------Luh, Lvh, Lwh son las escalas de longitud en direccion
-    Luh=0.302
-    Lvh=0.0815
-    Lwh=0.0326
+    Luh=float(datosNecesarios['escalaLongLong'])
+    Lvh=float(datosNecesarios['escalaLongTransv'])
+    Lwh=float(datosNecesarios['escalaLongVerti'])
     #------------------------------------
     #------dLu, dLv, dLw exponentes de intesidad longitudinal, transversal y vertical
-    dLu=0.473
-    dLv=0.8813
-    dLw=1.5390
+    dLu=float(datosNecesarios['escalaLongExpLong'])
+    dLv=float(datosNecesarios['escalaLongExpTransv'])
+    dLw=float(datosNecesarios['escalaLongExpVerti'])
     #-----------------------------------
-    Cxyz=np.array([10,10,10])
+    constanteDecaimiento = float(datosAvanzados['opAv_ConstDecaimiento'])
+    Cxyz=np.array([constanteDecaimiento,constanteDecaimiento,constanteDecaimiento])
     ##DGamm Es la distancia caracteristica D. 
     #Para edificios altos tiene que estar entre 0.5h-1.0h donde h es la altura del edificio.
     #Si los valores de D dan un Beta mayor a 6. Beta se vuelve independiente de D
-    DGamma=0.3 
-    nf=100 # Numero de frecuencias random dentro de un segmento tabla 2 (M)
-    nm=50 # Numero de segmentos de frecuencia tabla 2 (N)
-    fmax=100 # Frecuencia maxima tabla 2
+    DGamma=datosAvanzados['opAv_DistCaracteristica']
+    nf=int(datosAvanzados['opAv_CantFrecuencias']) # Numero de frecuencias random dentro de un segmento tabla 2 (M)
+    nm=int(datosAvanzados['opAv_CantSegmentos']) # Numero de segmentos de frecuencia tabla 2 (N)
+    fmax=int(datosAvanzados['opAv_FrecMaxima']) # Frecuencia maxima tabla 2
     dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo Seguro para mantener el numero de número de Courant
-    nt=1000 #Cantidad de pasos de tiempo
-    Z= np.arange(0.05,1.3,0.05) # Altura del dominio. 1.3 m
-    pasoDimensionY=2/7
-    Y= np.arange(-1.00,1+pasoDimensionY,pasoDimensionY) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
+    nt=int(datosAvanzados['opAv_CantPasosTemp']) #Cantidad de pasos de tiempo
+    Z= np.arange(float(datosGrilla['valorMinimoZ']),float(datosGrilla['valorMaximoZ']),float(datosAvanzados['opAv_PasoEspacial'])) # Altura del dominio. 1.3 m
+    pasoDimensionY=float(datosAvanzados['opAv_PasoGrilla'])
+    Y= np.arange(float(datosGrilla['valorMinimoY']),float(datosGrilla['valorMaximoY'])+pasoDimensionY,pasoDimensionY) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
     X=np.zeros((Z.shape[0]*Y.shape[0],1))
 
-    CDRFG_script(h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)
+    CDRFG_script(conGrilla,nombreArchivo,h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)
     
 
 if __name__ == "__main__":

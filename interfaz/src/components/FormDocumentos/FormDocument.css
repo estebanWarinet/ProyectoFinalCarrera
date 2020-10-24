@@ -1,0 +1,4 @@
+.OrdenCentradoVerticalDocumentos{
+    display:flex;
+    flex-direction : column;
+}

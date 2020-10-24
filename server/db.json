@@ -1,0 +1,45 @@
+{
+  "DatosEntrada": [
+    {
+      "datos": {
+        "datosGrilla": {
+          "stateConGrilla": true,
+          "archivoGrilla": "",
+          "valorMinimoY": "",
+          "valorMaximoY": "",
+          "valorMinimoZ": "",
+          "valorMaximoZ": ""
+        },
+        "datosNecesarios": {
+          "escala": "",
+          "alturaReferencia": "",
+          "velocidadMedia": "",
+          "exponenteVelocidad": "",
+          "intensidadLong": "",
+          "intensidadTransv": "",
+          "intensidadVerti": "",
+          "intensidadExpLong": "",
+          "intensidadExpTransv": "",
+          "intensidadExpVerti": "",
+          "escalaLongLong": "",
+          "escalaLongTransv": "",
+          "escalaLongVerti": "",
+          "escalaLongExpLong": "",
+          "escalaLongExpTransv": "",
+          "escalaLongExpVerti": ""
+        },
+        "datosAvanzados": {
+          "opAv_ConstDecaimiento": "",
+          "opAv_CantSegmentos": "",
+          "opAv_CantFrecuencias": "",
+          "opAv_FrecMaxima": "",
+          "opAv_CantPasosTemp": "",
+          "opAv_PasoEspacial": "",
+          "opAv_PasoGrilla": "",
+          "opAv_DistCaracteristica": 0.5
+        }
+      },
+      "id": 1
+    }
+  ]
+}

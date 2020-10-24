@@ -25,6 +25,7 @@ class FormGrillaControl extends React.Component{
                 </div>
             );
         }
+        console.log(this.props.stateConGrilla)
         return (
             <div>
                 <SinGrilla

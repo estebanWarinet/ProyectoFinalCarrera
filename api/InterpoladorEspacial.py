@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from stl import mesh
 
-def main(nombreArchivo):
+def main(nombreArchivo = 'Grilla.stl'):
     if 1:
         #filename = 'Turb15_rect21x21_100s.wind'
         filename = 'Vientos.wind'
@@ -150,9 +150,7 @@ def main(nombreArchivo):
     #stlmesh = mesh.Mesh.from_file('Inlet_swt23_300p.stl')
     stlmesh = mesh.Mesh.from_file('Grilla.stl')
     #stlmesh = mesh.Mesh.from_file('GrillaGerardoBin.stl')
-    #stlmesh = mesh.Mesh.from_file('GrillaGerardoCode.stl')
-
-
+    #stlmesh = mesh.Mesh.from_file('GrillaGerardoCode.stl')S
 
     # extraer todos los centroides
     Xc = []

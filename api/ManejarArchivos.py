@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import csv
+from zipfile import ZipFile
 
 def AbrirArchivos(vectorTiempo):
     ## Abrir los archivos y acomodarlos de la forma que se requiere para STAR CCM+
@@ -94,3 +95,13 @@ def CargarDatos(archivo, vectorTiempo, vectorPuntosX, vectorPuntosY, vectorPunto
     archivoWind.write('\n')
     
     archivoWind.close()
+
+def CrearArchivoZip():
+    # create a ZipFile object
+    zipObj = ZipFile('api.zip', 'w')
+    # Add multiple files to the zip
+    zipObj.write('TablaVelocidades.csv')
+    zipObj.write('TablaVelocidadesInterpolada.csv')
+    zipObj.write('Vientos.wind')
+    # close the Zip File
+    zipObj.close()

@@ -213,57 +213,85 @@ def CDRFG_script(conGrilla,nombreArchivo,h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,d
 
     intEspacial.main(nombreArchivo)
 
+    #================================================================================================
+    #=============================== Crear Archivos Zip =============================================
+    #================================================================================================
 
+    archivos.CrearArchivoZip()
 
-def main(datosGrilla,datosNecesarios,datosAvanzados): 
+def extrarExtremosDominio(nombreArchivo):
+    stlmesh = mesh.Mesh.from_file(nombreArchivo)
+    # extraer todos los centroides
+    Xc = []
+    for iv in range(len(stlmesh.v0)):
+        xc = 1./3.*(stlmesh.v0[iv,:] + stlmesh.v1[iv,:] + stlmesh.v2[iv,:])
+        Xc.append(xc)
+    Xc = np.array(Xc)
 
-    conGrilla = datosGrilla['stateConGrilla']
-    nombreArchivo = datosGrilla['archivoGrilla']
+    #computar limites para desplazar z (ojo con y)
+    miny = np.min(Xc[:,1])
+    minz = np.min(Xc[:,2])
+    maxy = np.max(Xc[:,1])
+    maxz = np.max(Xc[:,2])
+    return miny,minz,maxy,maxz
 
-    h0u=float(datosNecesarios['alturaReferencia'])
-    alphau=float(datosNecesarios['exponenteVelocidad'])
-    Uh=float(datosNecesarios['velocidadMedia'])
+def main(datos): 
 
-    h0I=float(datosNecesarios['alturaReferenciaIntensidad'])
+    conGrilla = bool(datos['stateConGrilla'])
+    nombreArchivo = datos['archivoGrilla']
+
+    h0u=float(datos['alturaReferencia'])
+    alphau=float(datos['exponenteVelocidad'])
+    Uh=float(datos['velocidadMedia'])
+
+    h0I=float(datos['alturaReferenciaIntensidad'])
     #--------Iuh,Ivh, Iwh son las intensidades longitudinal, transversal. Zou et al 2003 y ESDU 2001
-    Iuh=float(datosNecesarios['intensidadLong'])
-    Ivh=float(datosNecesarios['intensidadTransv'])
-    Iwh=float(datosNecesarios['intensidadVerti'])
+    Iuh=float(datos['intensidadLong'])
+    Ivh=float(datos['intensidadTransv'])
+    Iwh=float(datos['intensidadVerti'])
     #------------------------------------
     #-------dIu, dIv, dIw exponentes de intesidad longitudinal, transversal y vertical. Zou et al 2003 y ESDU 2001
-    dIu=float(datosNecesarios['intensidadExpLong'])
-    dIv=float(datosNecesarios['intensidadExpTransv'])
-    dIw=float(datosNecesarios['intensidadExpVerti'])
+    dIu=float(datos['intensidadExpLong'])
+    dIv=float(datos['intensidadExpTransv'])
+    dIw=float(datos['intensidadExpVerti'])
     #------------------------------------
-    h0L=float(datosNecesarios['alturaReferenciaEscalaLong']) # Altura de referencia para la escala de longitud
+    h0L=float(datos['alturaReferenciaEscalaLong']) # Altura de referencia para la escala de longitud
     #-------Luh, Lvh, Lwh son las escalas de longitud en direccion
-    Luh=float(datosNecesarios['escalaLongLong'])
-    Lvh=float(datosNecesarios['escalaLongTransv'])
-    Lwh=float(datosNecesarios['escalaLongVerti'])
+    Luh=float(datos['escalaLongLong'])
+    Lvh=float(datos['escalaLongTransv'])
+    Lwh=float(datos['escalaLongVerti'])
     #------------------------------------
     #------dLu, dLv, dLw exponentes de intesidad longitudinal, transversal y vertical
-    dLu=float(datosNecesarios['escalaLongExpLong'])
-    dLv=float(datosNecesarios['escalaLongExpTransv'])
-    dLw=float(datosNecesarios['escalaLongExpVerti'])
+    dLu=float(datos['escalaLongExpLong'])
+    dLv=float(datos['escalaLongExpTransv'])
+    dLw=float(datos['escalaLongExpVerti'])
     #-----------------------------------
-    constanteDecaimiento = float(datosAvanzados['opAv_ConstDecaimiento'])
+    constanteDecaimiento = float(datos['opAv_ConstDecaimiento'])
     Cxyz=np.array([constanteDecaimiento,constanteDecaimiento,constanteDecaimiento])
     ##DGamm Es la distancia caracteristica D. 
     #Para edificios altos tiene que estar entre 0.5h-1.0h donde h es la altura del edificio.
     #Si los valores de D dan un Beta mayor a 6. Beta se vuelve independiente de D
-    DGamma=datosAvanzados['opAv_DistCaracteristica']
-    nf=int(datosAvanzados['opAv_CantFrecuencias']) # Numero de frecuencias random dentro de un segmento tabla 2 (M)
-    nm=int(datosAvanzados['opAv_CantSegmentos']) # Numero de segmentos de frecuencia tabla 2 (N)
-    fmax=int(datosAvanzados['opAv_FrecMaxima']) # Frecuencia maxima tabla 2
+    DGamma=float(datos['opAv_DistCaracteristica'])
+    nf=int(datos['opAv_CantFrecuencias']) # Numero de frecuencias random dentro de un segmento tabla 2 (M)
+    nm=int(datos['opAv_CantSegmentos']) # Numero de segmentos de frecuencia tabla 2 (N)
+    fmax=int(datos['opAv_FrecMaxima']) # Frecuencia maxima tabla 2
     dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo Seguro para mantener el numero de número de Courant
-    nt=int(datosAvanzados['opAv_CantPasosTemp']) #Cantidad de pasos de tiempo
-    Z= np.arange(float(datosGrilla['valorMinimoZ']),float(datosGrilla['valorMaximoZ']),float(datosAvanzados['opAv_PasoEspacial'])) # Altura del dominio. 1.3 m
-    pasoDimensionY=float(datosAvanzados['opAv_PasoGrilla'])
-    Y= np.arange(float(datosGrilla['valorMinimoY']),float(datosGrilla['valorMaximoY'])+pasoDimensionY,pasoDimensionY) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
-    X=np.zeros((Z.shape[0]*Y.shape[0],1))
+    if (conGrilla):
+        miny,minz,maxy,maxz = extrarExtremosDominio(nombreArchivo)
+        pasoDimensionY = 0.25
+    else:
+        miny = float(datos['valorMinimoY'])
+        minz = float(datos['valorMinimoZ'])
+        maxy = float(datos['valorMaximoY'])
+        maxz = float(datos['valorMaximoZ'])
+        pasoDimensionY=float(datos['opAv_PasoGrilla'])
 
-    CDRFG_script(conGrilla,nombreArchivo,h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)
+    nt=int(datos['opAv_CantPasosTemp']) #Cantidad de pasos de tiempo
+    Z= np.arange(minz,maxz,float(datos['opAv_PasoEspacial'])) # Altura del dominio. 1.3 m
     
+    Y= np.arange(miny,maxy+pasoDimensionY,pasoDimensionY) # Posiciones en Y en el dominio -1.25 a 1.25 cada 0.25
+    X=np.zeros((Z.shape[0]*Y.shape[0],1))
+    CDRFG_script(conGrilla,nombreArchivo,h0u,alphau,Uh,h0I,Iuh,Ivh,Iwh,dIu,dIv,dIw,h0L,Luh,Lvh,Iwh,dLu,dLv,dLw,Cxyz,DGamma,nf,nm,fmax,dt,nt,X,Y,Z)
 
 if __name__ == "__main__":
     main()

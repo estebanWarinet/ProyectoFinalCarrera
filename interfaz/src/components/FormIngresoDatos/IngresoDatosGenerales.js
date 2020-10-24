@@ -16,6 +16,12 @@ class IngresoDatosGenerales extends React.Component{
             case "expVelocidad":
                 this.props.onChange("camposNecesarios","exponenteVelocidad",event.target.value)
                 break;
+            case "alturaReferenciaIntensidad":
+                this.props.onChange("camposNecesarios","alturaReferenciaIntensidad",event.target.value)
+                break;
+            case "alturaReferenciaEscalaLong":
+                this.props.onChange("camposNecesarios","alturaReferenciaEscalaLong",event.target.value)
+                break;
             default :
                 break;
         }
@@ -51,6 +57,20 @@ class IngresoDatosGenerales extends React.Component{
                     name="expVelocidad" 
                     placeholder="Exponente de Velocidad" 
                     value={this.props.exponenteVelocidad}
+                    onChange={this.controlarCambioInput}
+                />
+                <input className = "CajaSeparada" 
+                    type="number" 
+                    name="alturaReferenciaIntensidad" 
+                    placeholder="Altura Ref. Intensidad" 
+                    value={this.props.alturaReferenciaIntensidad}
+                    onChange={this.controlarCambioInput}
+                />
+                <input className = "CajaSeparada" 
+                    type="number" 
+                    name="alturaReferenciaEscalaLong" 
+                    placeholder="Altura Ref. Escala Longitudinal" 
+                    value={this.props.alturaReferenciaEscalaLong}
                     onChange={this.controlarCambioInput}
                 />
             </div>

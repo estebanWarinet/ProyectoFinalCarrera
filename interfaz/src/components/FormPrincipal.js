@@ -16,40 +16,78 @@ class FormPrincipal extends React.Component{
         opcionesAvanzadasActive : true,
         datosGrilla : {
             stateConGrilla: true,
-            archivoGrilla : "",
-            valorMinimoY: "", 
-            valorMaximoY: "", 
-            valorMinimoZ: "", 
-            valorMaximoZ: "",
+            archivoGrilla: "",
+            valorMinimoY: "-1.00",
+            valorMaximoY: "1.00",
+            valorMinimoZ: "0.05",
+            valorMaximoZ: "1.3"
         },
         camposNecesarios : {
-            escala : "",
-            alturaReferencia : "",
-            velocidadMedia : "",
-            exponenteVelocidad : "",
-            intensidadLong : "", 
-            intensidadTransv : "",
-            intensidadVerti : "",
-            intensidadExpLong : "",
-            intensidadExpTransv : "",
-            intensidadExpVerti : "",
-            escalaLongLong : "",
-            escalaLongTransv : "",
-            escalaLongVerti : "",
-            escalaLongExpLong : "",
-            escalaLongExpTransv : "",
-            escalaLongExpVerti : ""
+            escala : "500",
+            alturaReferencia : "0.3644",
+            velocidadMedia : "10.0",
+            exponenteVelocidad : "0.3264",
+            alturaReferenciaIntensidad :"0.3364",
+            intensidadLong : "0.2084",
+            intensidadTransv : "0.1815",
+            intensidadVerti : "0.1523",
+            intensidadExpLong : "-0.1914",
+            intensidadExpTransv : "-0.1228",
+            intensidadExpVerti : "-0.0048",
+            alturaReferenciaEscalaLong :"0.254",
+            escalaLongLong : "0.302",
+            escalaLongTransv : "0.0815",
+            escalaLongVerti : "0.0326",
+            escalaLongExpLong : "0.473",
+            escalaLongExpTransv : "0.8813",
+            escalaLongExpVerti : "1.5390"
         },
         camposOpcionesAvanzadas : {
-            opAv_ConstDecaimiento : "",
-            opAv_CantSegmentos : "",
-            opAv_CantFrecuencias : "",
-            opAv_FrecMaxima : "",
-            opAv_CantPasosTemp : "",
-            opAv_PasoEspacial : "",
-            opAv_PasoGrilla : ""
+            opAv_ConstDecaimiento : "10",
+            opAv_CantSegmentos : "50",
+            opAv_CantFrecuencias : "100",
+            opAv_FrecMaxima : "100",
+            opAv_CantPasosTemp : "1000",
+            opAv_PasoEspacial : "0.05",
+            opAv_PasoGrilla : "0.2857"
         },
-        opAv_DistCaracteristica : 0.5,
+        opAv_DistCaracteristica : 0.3,
+    }
+
+    submitAllFiles = async (e) => {
+
+        e.preventDefault();
+        let file = this.state.datosGrilla.archivoGrilla;
+        const formData = new FormData();
+
+        formData.append("file", file);
+        var dato;
+        dato= file.name;
+        formData.append("archivoGrilla",dato);
+        Object.keys(this.state.camposNecesarios).map(i => {
+            dato = this.state.camposNecesarios[i];
+            formData.append(i, dato);
+        });
+        Object.keys(this.state.datosGrilla).map(i => {
+            if (i !== "archivoGrilla"){
+                dato = this.state.datosGrilla[i];
+                formData.append(i, dato);
+            }
+        });
+        const datosOpcionesAvanzadas = this.state.camposOpcionesAvanzadas;
+        const opAv_DistCaracteristica = this.state.opAv_DistCaracteristica;
+        const datosAvanzados = {...datosOpcionesAvanzadas,opAv_DistCaracteristica}
+        Object.keys(datosAvanzados).map(i => {
+            dato = datosAvanzados[i];
+            formData.append(i, dato);
+        });
+
+        await ApiAddress
+            .post("/upload", formData)
+            .then(res => console.log(res))
+            .catch(err => console.warn(err));
+        history.push('/');    
+        
     }
 
     limpiarEstadosParticulares = (estado,valor) =>{
@@ -125,11 +163,6 @@ class FormPrincipal extends React.Component{
         
     }
 
-    manejarArchivo = () => {
-        const formData = new FormData();
-        return formData.append('file', this.state.archivoGrilla);
-    }
-
     onSubmit = async () => {
         //console.log(this.controlarOpcionesVacias())
         const datosGrilla = this.state.datosGrilla;
@@ -138,7 +171,7 @@ class FormPrincipal extends React.Component{
         const opAv_DistCaracteristica = this.state.opAv_DistCaracteristica;
         const datosAvanzados = {...datosOpcionesAvanzadas,opAv_DistCaracteristica}
         const datos = {datosGrilla, datosNecesarios, datosAvanzados}
-        await ApiAddress.post('/DatosEntrada',{
+        await ApiAddress.post('/ejecutarCDRFG',{
             datos
         });
         history.push('/Generando');
@@ -174,7 +207,6 @@ class FormPrincipal extends React.Component{
                 }
             });
         });
-        console.log(this.state.camposOpcionesAvanzadas);
     }
 
     render(){
@@ -197,12 +229,14 @@ class FormPrincipal extends React.Component{
                         alturaReferencia = {this.state.camposNecesarios.alturaReferencia}
                         velocidadMedia = {this.state.camposNecesarios.velocidadMedia}
                         exponenteVelocidad = {this.state.camposNecesarios.exponenteVelocidad}
+                        alturaReferenciaIntensidad = {this.state.camposNecesarios.alturaReferenciaIntensidad}
                         intensidadLong = {this.state.camposNecesarios.intensidadLong}
                         intensidadTransv = {this.state.camposNecesarios.intensidadTransv}
                         intensidadVerti = {this.state.camposNecesarios.intensidadVerti}
                         intensidadExpLong = {this.state.camposNecesarios.intensidadExpLong}
                         intensidadExpTransv = {this.state.camposNecesarios.intensidadExpTransv}
                         intensidadExpVerti = {this.state.camposNecesarios.intensidadExpVerti}
+                        alturaReferenciaEscalaLong = {this.state.camposNecesarios.alturaReferenciaEscalaLong}
                         escalaLongLong = {this.state.camposNecesarios.escalaLongLong}
                         escalaLongTransv = {this.state.camposNecesarios.escalaLongTransv}
                         escalaLongVerti = {this.state.camposNecesarios.escalaLongVerti}
@@ -231,7 +265,7 @@ class FormPrincipal extends React.Component{
                     
                     />
                 </div>
-                < BotonesInferiores limpiarDatos = {this.limpiarDatos} generarDatos = {this.onSubmit}/>
+                < BotonesInferiores limpiarDatos = {this.submitAllFiles} generarDatos = {this.onSubmit}/>
             </div>
         );
     }

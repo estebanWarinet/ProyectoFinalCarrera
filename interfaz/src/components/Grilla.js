@@ -13,9 +13,10 @@ class Grilla extends React.Component {
     }
 
     controlarCambioInput = (event) => {
-        console.log(event.target.files)
-        let data = new FormData();
-        data.append('file', event.target.files[0])
+        //let data = new FormData();
+        //data.append('file', event.target.files[0])
+        let data =  event.target.files[0]
+
         this.props.onChange("datosGrilla","archivoGrilla",data);
     }
 

@@ -6,12 +6,13 @@ import OpcionesAvazadas from './FormOpcionesAvanzadas/FormOpcionesAvanzadas';
 import BotonesInferiores from './BotononesInferiores';
 import ApiAddress from './Api/Api';
 import history from './history';
+import ModalImagen from './ModalImagenesult'
 
 import './FormPrincipal.css';
 
 
 class FormPrincipal extends React.Component{
-
+    // ================= Estados ====================
     state = {
         opcionesAvanzadasActive : true,
         datosGrilla : {
@@ -52,17 +53,22 @@ class FormPrincipal extends React.Component{
             opAv_PasoGrilla : "0.2857"
         },
         opAv_DistCaracteristica : 0.3,
+        imageData : null,
+        openModal : false
     }
 
-    submitAllFiles = async (e) => {
-
-        e.preventDefault();
+    // ================= POST al server para ejecutar CDRFG ==================
+    submitAllFiles = async () => {
         let file = this.state.datosGrilla.archivoGrilla;
         const formData = new FormData();
-
-        formData.append("file", file);
         var dato;
-        dato= file.name;
+        if(this.state.datosGrilla.archivoGrilla !== ""){
+            formData.append("file", file);
+            dato= file.name;
+        }else{
+            dato = "NO-Archivo"
+        }
+        
         formData.append("archivoGrilla",dato);
         Object.keys(this.state.camposNecesarios).map(i => {
             dato = this.state.camposNecesarios[i];
@@ -82,14 +88,19 @@ class FormPrincipal extends React.Component{
             formData.append(i, dato);
         });
 
-        await ApiAddress
-            .post("/upload", formData)
-            .then(res => console.log(res))
+            await ApiAddress
+            .post('/upload', formData)
+            .then(res => {
+                console.log(res.data)
+                this.setState({imageData : res.data, openModal : true})
+            })
             .catch(err => console.warn(err));
-        history.push('/');    
-        
+
+        history.push('/Generando');  
+            
     }
 
+    // =============== Intento de limpiar datos avanzados ==================
     limpiarEstadosParticulares = (estado,valor) =>{
         this.setState({
             camposOpcionesAvanzadas: {
@@ -99,6 +110,7 @@ class FormPrincipal extends React.Component{
         });
     }
 
+    // ==================== Funcion para setear estados =====================
     setEstados = (nombre,estado,valor) => {
         switch (nombre){
             case "datosGrilla":
@@ -130,12 +142,17 @@ class FormPrincipal extends React.Component{
                     [estado]: valor
                 });
                 break;
+            case "openModal":
+                this.setState({
+                    [estado]: valor
+                });
+                break;
             default:
                 break;
         }
     }
 
-    limpiarDatos = () => {
+    limpiarDatos = async () => {
         //this.setState({
         //    archivoGrilla : "",
         //    valorMinimoY: "",
@@ -160,30 +177,23 @@ class FormPrincipal extends React.Component{
         //    escalaLongExpVerti : ""
         //});
         //this.limpiarDatosAvanzados();
-        
+        const response = await ApiAddress
+            .get("/descargar-desdeDirectorio");
+        history.push('/');  
+
+        console.log(response.data);
+        this.setState({imageData : response.data, openModal : true})
     }
 
-    onSubmit = async () => {
-        //console.log(this.controlarOpcionesVacias())
-        const datosGrilla = this.state.datosGrilla;
-        const datosNecesarios = this.state.camposNecesarios;
-        const datosOpcionesAvanzadas = this.state.camposOpcionesAvanzadas;
-        const opAv_DistCaracteristica = this.state.opAv_DistCaracteristica;
-        const datosAvanzados = {...datosOpcionesAvanzadas,opAv_DistCaracteristica}
-        const datos = {datosGrilla, datosNecesarios, datosAvanzados}
-        await ApiAddress.post('/ejecutarCDRFG',{
-            datos
-        });
-        history.push('/Generando');
-    }
+    showImage = () => {
 
-    controlarCambioOpcionesAvanzadas = () => {
-        if(this.state.opcionesAvanzadasActive){
-            this.setState({opcionesAvanzadasActive : false});
-        }else{
-            this.setState({opcionesAvanzadasActive : true});
+        if (this.state.imageData !== null) {
+            return  <ModalImagen 
+                        imageData = {this.state.imageData} 
+                        openModal = {this.state.openModal}
+                        onChange = {this.setEstados}/>
         }
-        this.limpiarDatosAvanzados();
+        return <div>NO IMAGE</div>
     }
 
     limpiarDatosAvanzados = () => {
@@ -207,6 +217,16 @@ class FormPrincipal extends React.Component{
                 }
             });
         });
+    }
+
+    // =================== Para activar y desactivar op avanzadas ======================
+    controlarCambioOpcionesAvanzadas = () => {
+        if(this.state.opcionesAvanzadasActive){
+            this.setState({opcionesAvanzadasActive : false});
+        }else{
+            this.setState({opcionesAvanzadasActive : true});
+        }
+        this.limpiarDatosAvanzados();
     }
 
     render(){
@@ -265,7 +285,7 @@ class FormPrincipal extends React.Component{
                     
                     />
                 </div>
-                < BotonesInferiores limpiarDatos = {this.submitAllFiles} generarDatos = {this.onSubmit}/>
+                < BotonesInferiores limpiarDatos = {this.limpiarDatos} generarDatos = {this.submitAllFiles}/>
             </div>
         );
     }

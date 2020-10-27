@@ -150,7 +150,7 @@ def main(nombreArchivo = 'Grilla.stl'):
     #stlmesh = mesh.Mesh.from_file('Inlet_swt23_300p.stl')
     stlmesh = mesh.Mesh.from_file('Grilla.stl')
     #stlmesh = mesh.Mesh.from_file('GrillaGerardoBin.stl')
-    #stlmesh = mesh.Mesh.from_file('GrillaGerardoCode.stl')S
+    #stlmesh = mesh.Mesh.from_file('GrillaGerardoCode.stl')
 
     # extraer todos los centroides
     Xc = []

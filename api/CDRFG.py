@@ -276,7 +276,7 @@ def main(datos):
     nm=int(datos['opAv_CantSegmentos']) # Numero de segmentos de frecuencia tabla 2 (N)
     fmax=int(datos['opAv_FrecMaxima']) # Frecuencia maxima tabla 2
     dt=1/fmax/2/2.5 # Paso de tiempo. Analizar de donde sale este calculo Seguro para mantener el numero de número de Courant
-    if (conGrilla):
+    if (conGrilla and nombreArchivo != 'NO-Archivo'):
         miny,minz,maxy,maxz = extrarExtremosDominio(nombreArchivo)
         pasoDimensionY = 0.25
     else:

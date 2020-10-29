@@ -19,6 +19,8 @@ class FormIngresoDatos extends React.Component{
                                 alturaReferencia = {this.props.alturaReferencia}
                                 velocidadMedia = {this.props.velocidadMedia}
                                 exponenteVelocidad = {this.props.exponenteVelocidad}
+                                alturaReferenciaIntensidad = {this.props.alturaReferenciaIntensidad}
+                                alturaReferenciaEscalaLong = {this.props.alturaReferenciaEscalaLong}
                                 onChange = {this.props.onChange}
                             />
                             <div >
